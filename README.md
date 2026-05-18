@@ -6,6 +6,14 @@
 
 This is a repository for data visualization options.
 
+To use the code in this repository, you will need to have the following packages installed:
+
+```
+library(tidyverse)
+library(flextable)
+library(ggridges)
+```
+
 # Data and file information
 
 ```
