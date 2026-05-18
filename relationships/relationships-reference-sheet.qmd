@@ -31,7 +31,7 @@ library(here)
 ```
 
 ```{r}
-#| label: data
+#| label: data-and-cleaning
 
 birds <- read_csv("https://raw.githubusercontent.com/ENVS-193DD/datasets/refs/heads/main/birds/birds.csv")
 
@@ -54,7 +54,7 @@ weather_clean <- weather |>
 ```
 
 ```{r}
-#| label: wrangling-shorebirds-2025wy
+#| label: wrangling-all-shorebirds
 
 # creating new object from birds
 shorebirds <- birds |> 
@@ -93,15 +93,8 @@ shorebirds <- birds |>
   left_join(weather_clean, by = c("observation_date" = "date"))
 ```
 
-
-improving timeseries plots
-birds: color by migratory or non-migratory? or by genus
-change this to vegetation
-
-
-
 ```{r}
-#| label: wrangling-all-shorebirds
+#| label: wrangling-2025-shorebirds
 
 shorebirds_wy2025 <- shorebirds |> 
   filter(between(observation_date, as_date("2024-10-01"), as_date("2025-09-30"))) |> 
@@ -135,12 +128,20 @@ theme_set(
 )
 ```
 
-```{r}
-shorebirds_area <- ggplot
-```
+\newpage
 
+# 1. Timeseries plots
+
+## a. Basic plot
+
+Issues:
+
+-   legend takes up space
+-   hard to distinguish trends between species
 
 ```{r}
+#| label: basic-timeseries
+
 # base layer
 basic_plot <- ggplot(data = shorebirds_wy2025,
                                 # x-axis: survey date
@@ -157,9 +158,17 @@ basic_plot <- ggplot(data = shorebirds_wy2025,
 basic_plot
 ```
 
+\newpage
+
+## b. Direct labelling
+
+Improvements:
+
+-   directly labelled species (getting rid of legend)
+-   highlighting major events in time
 
 ```{r}
-#| fig-height: 4
+#| fig-height: 8
 #| fig-width: 10
 
 # base layer
@@ -260,23 +269,64 @@ shorebirds_directlabel <- ggplot(data = shorebirds_wy2025,
 shorebirds_directlabel
 ```
 
-```{r}
-#| label: saving-figure
-#| echo: false
-#| eval: false
+\newpage
 
-ggsave(
-  plot = shorebirds_directlabel,
-  filename = here("relationships", "shorebirds-directlabel.svg"),
-  height = 10,
-  width = 12,
-  unit = "in",
-  dpi = 300
-)
+## c. Filled areas
+
+Improvements:
+
+-   easier to compare areas than points/lines
+-   legend inside plot area (takes up less space)
+
+```{r}
+shorebirds_area <- ggplot(data = shorebirds_wy2025,
+                          mapping = aes(x = observation_date,
+                                        y = total,
+                                        fill = species)) +
+  # first layer: filled areas representing species counts
+  geom_area() +
+  
+  # axis appearance -----
+  # adjusting appearance of x-axis
+  scale_x_date(
+     # setting breaks so that date labels appear every month
+     breaks = as_date(c("2024-10-01", "2024-11-01", "2024-12-01",
+                        "2025-01-01", "2025-02-01", "2025-03-01",
+                        "2025-04-01", "2025-05-01", "2025-06-01",
+                        "2025-07-01", "2025-08-01", "2025-09-01")),
+     # label dates with month abbreviations
+     date_labels = "%b",
+     expand = c(0, 0)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.01))) +
+    
+  # other plot appearance customization -----
+  # set custom colors
+  scale_fill_manual(values = colors) +
+  # relabelling x- and y-axes
+  labs(x = "Date",
+       y = "Total counts",
+       fill = "Species") +
+  # theme adjustments
+  theme(panel.grid = element_blank(),
+        legend.position = c(0.8, 0.8)) 
+
+
+shorebirds_area
 ```
 
+\newpage
+
+## d. Highlighting lines in multiple plots
+
+Improvements:
+
+-   showing each species individually while keeping other species to compare
+-   easier to see trends for each species
 
 ```{r}
+#| label: highlights
+#| fig-width: 11
+
 # creating new data frame for highlighted plot
 highlight_df <- shorebirds_wy2025 |> 
   # creating new column that is a duplicate of existing species column
@@ -326,62 +376,96 @@ shorebirds_highlight <- ggplot(mapping = aes(x = observation_date,
 shorebirds_highlight
 ```
 
-```{r}
-shorebirds_area <- ggplot(data = shorebirds_wy2025,
-                          mapping = aes(x = observation_date,
-                                        y = total,
-                                        fill = species)) +
-  # first layer: filled areas representing species counts
-  geom_area() +
-  
-  # axis appearance -----
-  # adjusting appearance of x-axis
-  scale_x_date(
-     # setting breaks so that date labels appear every month
-     breaks = as_date(c("2024-10-01", "2024-11-01", "2024-12-01",
-                        "2025-01-01", "2025-02-01", "2025-03-01",
-                        "2025-04-01", "2025-05-01", "2025-06-01",
-                        "2025-07-01", "2025-08-01", "2025-09-01")),
-     # label dates with month abbreviations
-     date_labels = "%b",
-     expand = c(0, 0)) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.01))) +
-    
-  # other plot appearance customization -----
-  # set custom colors
-  scale_fill_manual(values = colors) +
-  # theme adjustments
-  theme(panel.grid = element_blank(),
-        legend.position = c(0.8, 0.8)) 
+\newpage
 
+# 2. Relationships between variables
 
-shorebirds_area
-```
+## a. Total shorebird counts as a function of temperature
+
+Each point represents a survey. The y-axis represents the total number of shorebirds counted in a survey, and the x-axis represents the mean monthly maximum temperature for the month of that survey.
 
 ```{r}
+#| label: totals-temp-fig
 #| fig-width: 8
 #| fig-height: 6
 
-ggplot(data = shorebirds,
-       mapping = aes(x = total_monthly_precip_in,
-                     y = total)) +
-  geom_point(shape = 21,
-             color = "darkblue") +
-  #scale_y_continuous(breaks = seq(from = 0, to = 100, by = 10)) +
-  facet_wrap(~ species,
-             scales = "free_y") +
-  scale_color_manual(values = colors) +
-  labs(x = "Total monthly precipitation (in)",
+# creating new object
+shorebirds_totals <- shorebirds |> 
+  # calculating total counts for all shorebirds
+  group_by(observation_date) |> 
+  summarize(total_allspp = sum(total)) |> 
+  ungroup() |> 
+  # joining with weather data
+  left_join(weather_clean, by = c("observation_date" = "date"))
+
+# plotting temp and total counts
+temp_count_scatterplot <- ggplot(data = shorebirds_totals,
+       # x-axis: mean maximum temperature
+       # y-axis: total counts
+       mapping = aes(x = mean_monthly_tmax_f,
+                     y = total_allspp)) +
+  # points to represent mean monthly temp and total counts of shorebirds
+  # for each survey
+  geom_point(shape = 21) +
+  # relabelling axes, adding title
+  labs(x = "Mean monthly maximum temperature (\U00B0 F)",
        y = "Total counts",
-       color = "Family")
-# is this a "causal" relationship or do these variables "co-vary"?
+       title = "All shorebird species") +
+  # moving title
+  theme(plot.title.position = "plot")
+
+# displaying plot
+temp_count_scatterplot
 ```
+
+\newpage
+
+## b. Total species counts as a function of temperature
+
+Each point represents a survey. The y-axis represents the total number counted in a survey for a given species, and the x-axis represents the mean monthly maximum temperature for the month of that survey.
 
 ```{r}
-bird <- shorebirds |> 
-  filter(species == "Western Sandpiper")
+#| label: species-temp-fig
+#| fig-height: 8
 
-cor.test(bird$total, bird$total_monthly_precip_in,
-         method = "spearman")
+temp_count_spp <- shorebirds |> 
+  # filtering for top 5 species
+  filter(species %in% c("Killdeer", "Least Sandpiper", "Black-necked Stilt", 
+                        "Greater Yellowlegs", "Western Sandpiper")) |> 
+  # x-axis: temp, y: total counts for each species
+  ggplot(mapping = aes(x = mean_monthly_tmax_f,
+                       y = total)) +
+  # points to represent spp total counts and mean monthly max temp
+  geom_point(shape = 21,
+             color = "darkblue",
+             alpha = 0.5) +
+  # different panels for each species
+  facet_wrap(~ species,
+             scales = "free_y",
+             ncol = 1) +
+  # relabelling axes
+  labs(x = "Mean monthly maximum temperature (\U00B0 F)",
+       y = "Total counts")
+
+# displaying plot
+temp_count_spp
 ```
+
+
+# 3. Analyses to examine relationships
+
+If you think one variable _predicts_ another (i.e. you think you could guess at the total counts for a species if you knew a given maximum temperature), you should use a **linear model.**
+
+If you think the variables are related but one variable doesn't necessarily predict another, you should use **correlation**.
+
+There are two types of correlation: **Pearson correlation** and **Spearman correlation**. 
+
+
+
+
+
+
+
+
+
 
