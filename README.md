@@ -27,13 +27,10 @@ library(here)
 │   ├── figures                            # saved figures from reference sheet
 │   ├── groups-reference-sheet.pdf         # overview sheet (no code)
 │   └── groups-reference-sheet.qmd         # code and formatting examples
-├── data-visualization_spring-2026.Rproj
 └── relationships
     ├── figures                            # saved figures from reference sheet
     ├── relationships-reference-sheet.pdf  # overview sheet (no code)
-    └── relationships-reference-sheet.qmd # code and formatting examples
-
-5 directories, 23 files
+    └── relationships-reference-sheet.qmd  # code and formatting examples
 ```
 
 # Rendered output
