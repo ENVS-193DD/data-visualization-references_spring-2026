@@ -31,7 +31,7 @@ library(ggridges)
 ```{r}
 #| label: data
 
-# reading in data
+# reading in data from "raw" csv stored in repo: https://github.com/ENVS-193DD/datasets
 wq <- read_csv("https://raw.githubusercontent.com/ENVS-193DD/datasets/refs/heads/main/water-quality/wq_clean.csv") |> 
   # reordering factor levels
   mutate(site_name = fct_relevel(site_name,
@@ -350,7 +350,7 @@ The transformation can help with visualization (i.e. make it easier to pick out 
 
 - x-axis: categories (levels in a factor)
 - y-axis: variable of interest
-- geometry: jittered points
+- geometry: violin
 
 **Pay attention to:**
 
@@ -548,7 +548,7 @@ You can save a figure as any file type (e.g. .jpg, .png, .svg, .pdf) using `ggsa
 
 ggsave(
   # file path to store figure
-  here::here("comparing-groups", "ridges.jpg"),
+  here::here("comparing-groups", "figures", "ridges.jpg"),
   # object name
   ridges,
   # figure dimensions

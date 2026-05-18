@@ -6,7 +6,17 @@
 
 This is a repository for data visualization options.
 
-i'm adding stuff to my own readme here
+To use the code in this repository, you will need to have the following packages installed:
+
+```
+library(tidyverse)
+library(flextable)
+library(ggridges)
+library(janitor)
+library(ggrepel)
+library(cowplot)
+library(here)
+```
 
 # Data and file information
 
@@ -14,8 +24,9 @@ i'm adding stuff to my own readme here
 .
 ├── README.md
 ├── comparing-groups
-│   ├── groups-reference-sheet.pdf         # reference sheet for figures - use this to get an overview
-│   └── groups-reference-sheet.qmd         # code for reference sheet - use this to get examples of code
+│   ├── figures                            # saved figures from reference sheet
+│   ├── groups-reference-sheet.pdf         # overview sheet (no code)
+│   └── groups-reference-sheet.qmd         # code and formatting examples
 └── data-visualization_spring-2026.Rproj
 ```
 
