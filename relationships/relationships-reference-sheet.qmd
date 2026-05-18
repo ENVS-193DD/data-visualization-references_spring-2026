@@ -26,6 +26,8 @@ execute:
 library(tidyverse)
 library(janitor)
 library(ggrepel)
+library(cowplot)
+library(here)
 ```
 
 ```{r}
@@ -129,74 +131,231 @@ colors <- c(
 
 theme_set(
   theme_bw() +
-    theme(text = element_text(size = 12))
+    theme(text = element_text(size = 14))
 )
+```
+
+```{r}
+shorebirds_area <- ggplot
+```
+
+
+```{r}
+# base layer
+basic_plot <- ggplot(data = shorebirds_wy2025,
+                                # x-axis: survey date
+                                # y-axis: total counts
+                                mapping = aes(x = observation_date,
+                                              y = total,
+                                              color = species)) +
+  # basic geometries -----
+  # points to represent counts at each survey
+  geom_point() +
+  # lines to connect points
+  geom_line()
+
+basic_plot
 ```
 
 
 ```{r}
 #| fig-height: 4
 #| fig-width: 10
-#| 
-library(cowplot)
-#| 
-ggplot(data = shorebirds_wy2025,
-       mapping = aes(x = observation_date,
-                     y = total,
-                     color = species,
-                     group = species)) +
+
+# base layer
+shorebirds_directlabel <- ggplot(data = shorebirds_wy2025,
+                                # x-axis: survey date
+                                # y-axis: total counts
+                                mapping = aes(x = observation_date,
+                                              y = total,
+                                              color = species)) +
+  # basic geometries -----
+  # points to represent counts at each survey
   geom_point() +
+  # lines to connect points
   geom_line() +
-  scale_x_date(expand = expansion(mult = c(0.3, 0.1)),
-               limits = c(as_date("2024-10-01"), NA),
-               breaks = as_date(c("2024-10-01", "2024-11-01", "2024-12-01", 
-                                  "2025-01-01", "2025-02-01", "2025-03-01", 
-                                  "2025-04-01", "2025-05-01", "2025-06-01", 
-                                  "2025-07-01", "2025-08-01", "2025-09-01")),
-               date_labels = "%b") +
+  
+  # axis appearance -----
+  # adjusting appearance of x-axis
+  scale_x_date(
+    # expanding axis
+    expand = expansion(mult = c(0.3, 0.1)),
+    # setting limits (no upper bound)
+    limits = c(as_date("2024-10-01"), NA),
+    # setting breaks so that date labels appear every month
+    breaks = as_date(c("2024-10-01", "2024-11-01", "2024-12-01",
+                       "2025-01-01", "2025-02-01", "2025-03-01",
+                       "2025-04-01", "2025-05-01", "2025-06-01",
+                       "2025-07-01", "2025-08-01", "2025-09-01")),
+    # label dates with month abbreviations
+    date_labels = "%b") +
+  # set y-axis expansion
   scale_y_continuous(expand = expansion(mult = c(0.01, 0.1))) +
-  geom_text_repel(mapping = aes(label = species_label),
-                  seed = 100,
-                  # right align labels
-                  hjust = 1,
-                  # repel in y direction only
-                  direction = "y",
-                  # linetype
-                  segment.linetype = 3,
-                  # nudge starting point 5 units to left
-                  nudge_x = -1,
-                  nudge_y = 1,
-                  # width
-                  segment.size = 0.5,
-                  max.overlaps = Inf,
-                  force = 0.5,
-                  xlim  = as_date("2024-10-01"),
-                  show.legend = FALSE) +
+  
+  # species text labels -----
+  geom_text_repel(
+    # new aesthetics for label text
+    mapping = aes(label = species_label),
+    # setting random seed 
+    # (play around with this number until you get an arrangement you like)
+    seed = 100,
+    # right align labels
+    hjust = 1,
+    # repel in y direction only
+    direction = "y",
+    # linetype
+    segment.linetype = 3,
+    # text
+    size = 5,
+    # nudge starting point of label to the left along x-axis and up along y-axis
+    nudge_x = -1,
+    nudge_y = 1,
+    # lengthen line length
+    segment.size = 0.5,
+    # amount of repulsion between text labels
+    force = 0.5,
+    # set the x-axis position for where the labels should start
+    xlim  = as_date("2024-10-01"),
+    # remove text from the plot legend
+    show.legend = FALSE) +
+  
+  # vertical lines for annotations -----
+  # add vertical line for major rain event in January
   geom_vline(xintercept = as_date("2025-01-26"),
              linetype = "dashed") +
-    draw_label("First major rain event\n(3.40 in)",
-             #fontfamily = annotate_text,
-             x =  as_date("2025-01-20"),   
+  # text label (from cowplot package)
+  draw_label("First major rain event\n(3.40 in)",
+             # x- and y-axis position
+             x = as_date("2025-01-20"),   
              y = 85,
+             # right alignment
              hjust = 1,
+             # text size
              size = 14) +
+  # add vertical line for major rain event in March
   geom_vline(xintercept = as_date("2025-03-12"),
              linetype = "dashed") +
-    draw_label("Last major rain event\n(1.11 in)",
-             #fontfamily = annotate_text,
-             x =  as_date("2025-03-17"),   
-             hjust = 0,
+  # text label
+  draw_label("Last major rain event\n(1.11 in)",
+             # x- and y-axis position
+             x = as_date("2025-03-17"),   
              y = 85,
+             # left alignment
+             hjust = 0,
+             # text size
              size = 14) +
+  
+  # other plot appearance customization -----
+  # set custom colors
   scale_color_manual(values = colors) +
+  # relabelling x- and y-axes
   labs(x = "Date",
-       y = "Total counts",
-       color = "Family") +
+       y = "Total counts") +
+  # theme adjustments
   theme(legend.position = "none",
         panel.grid = element_blank(),
         legend.background = element_blank())
-ggsave("image.svg")
 
+
+shorebirds_directlabel
+```
+
+```{r}
+#| label: saving-figure
+#| echo: false
+#| eval: false
+
+ggsave(
+  plot = shorebirds_directlabel,
+  filename = here("relationships", "shorebirds-directlabel.svg"),
+  height = 10,
+  width = 12,
+  unit = "in",
+  dpi = 300
+)
+```
+
+
+```{r}
+# creating new data frame for highlighted plot
+highlight_df <- shorebirds_wy2025 |> 
+  # creating new column that is a duplicate of existing species column
+  mutate(species2 = species)
+
+shorebirds_highlight <- ggplot(mapping = aes(x = observation_date, 
+                                             y = total)) +
+  # first layer: grey lines for all species counts
+  geom_line(data = highlight_df |> select(-species), 
+            mapping = aes(group = species2), 
+            color = "grey", 
+            linewidth = 0.5, 
+            alpha = 0.5) +
+  # second layer: colored lines for individual species counts
+  geom_line(data = highlight_df, 
+            mapping = aes(color = species),
+            linewidth = 1) +
+  # different panels for each species
+  facet_wrap(~species) +
+  
+  # axis appearance -----
+  # adjusting appearance of x-axis
+  scale_x_date(
+    # setting breaks so that date labels appear every month
+    breaks = as_date(c("2024-10-01", "2024-11-01", "2024-12-01",
+                       "2025-01-01", "2025-02-01", "2025-03-01",
+                       "2025-04-01", "2025-05-01", "2025-06-01",
+                       "2025-07-01", "2025-08-01", "2025-09-01")),
+    # label dates with month abbreviations
+    date_labels = "%b") +
+  # set y-axis expansion
+  scale_y_continuous(expand = expansion(mult = c(0.01, 0.1))) +
+  
+  # other plot appearance customization -----
+  # set custom colors
+  scale_color_manual(values = colors) +
+    # relabelling x- and y-axes
+    labs(x = "Date",
+         y = "Total counts") +
+    # theme adjustments
+    theme(legend.position = "none",
+          panel.grid = element_blank(),
+          legend.background = element_blank(),
+          strip.background = element_rect(color = "#000000",
+                                          fill = "#FFFFFF"))
+
+shorebirds_highlight
+```
+
+```{r}
+shorebirds_area <- ggplot(data = shorebirds_wy2025,
+                          mapping = aes(x = observation_date,
+                                        y = total,
+                                        fill = species)) +
+  # first layer: filled areas representing species counts
+  geom_area() +
+  
+  # axis appearance -----
+  # adjusting appearance of x-axis
+  scale_x_date(
+     # setting breaks so that date labels appear every month
+     breaks = as_date(c("2024-10-01", "2024-11-01", "2024-12-01",
+                        "2025-01-01", "2025-02-01", "2025-03-01",
+                        "2025-04-01", "2025-05-01", "2025-06-01",
+                        "2025-07-01", "2025-08-01", "2025-09-01")),
+     # label dates with month abbreviations
+     date_labels = "%b",
+     expand = c(0, 0)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.01))) +
+    
+  # other plot appearance customization -----
+  # set custom colors
+  scale_fill_manual(values = colors) +
+  # theme adjustments
+  theme(panel.grid = element_blank(),
+        legend.position = c(0.8, 0.8)) 
+
+
+shorebirds_area
 ```
 
 ```{r}
@@ -205,9 +364,9 @@ ggsave("image.svg")
 
 ggplot(data = shorebirds,
        mapping = aes(x = total_monthly_precip_in,
-                     y = total,
-                     color = family)) +
-  geom_point() +
+                     y = total)) +
+  geom_point(shape = 21,
+             color = "darkblue") +
   #scale_y_continuous(breaks = seq(from = 0, to = 100, by = 10)) +
   facet_wrap(~ species,
              scales = "free_y") +
