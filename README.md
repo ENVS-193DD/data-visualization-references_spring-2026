@@ -39,3 +39,4 @@ library(here)
 # Rendered output
 
 - [Reference sheet for comparing groups](https://github.com/ENVS-193DD/data-visualization-references_spring-2026/blob/main/comparing-groups/groups-reference-sheet.pdf)
+- [Reference sheet for relationships between variables](https://github.com/ENVS-193DD/data-visualization-references_spring-2026/blob/main/relationships/relationships-reference-sheet.pdf)
