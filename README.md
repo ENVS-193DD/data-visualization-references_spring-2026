@@ -27,9 +27,15 @@ library(here)
 │   ├── figures                            # saved figures from reference sheet
 │   ├── groups-reference-sheet.pdf         # overview sheet (no code)
 │   └── groups-reference-sheet.qmd         # code and formatting examples
-└── data-visualization_spring-2026.Rproj
+├── data-visualization_spring-2026.Rproj
+└── relationships
+    ├── figures                            # saved figures from reference sheet
+    ├── relationships-reference-sheet.pdf  # overview sheet (no code)
+    └── relationships-reference-sheet.qmd # code and formatting examples
+
+5 directories, 23 files
 ```
 
 # Rendered output
 
-- [Reference sheet for comparing groups](https://github.com/ENVS-193DD/data-visualization_spring-2026/blob/main/comparing-groups/groups-reference-sheet.pdf)
+- [Reference sheet for comparing groups](https://github.com/ENVS-193DD/data-visualization-references_spring-2026/blob/main/comparing-groups/groups-reference-sheet.pdf)
